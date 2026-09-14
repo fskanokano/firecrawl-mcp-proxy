@@ -1,0 +1,28 @@
+{
+  "name": "firecrawl-mcp-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Firecrawl MCP proxy for Vercel: full-featured Firecrawl MCP (all tools) behind your own proxy API key, plus a credits endpoint.",
+  "keywords": [
+    "firecrawl",
+    "mcp",
+    "model-context-protocol",
+    "vercel",
+    "proxy"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.js",
+    "check": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 300
+    },
+    "api/credits.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/mcp", "destination": "/api/mcp" },
+    { "source": "/v2/mcp", "destination": "/api/mcp" },
+    { "source": "/sse", "destination": "/api/sse" },
+    { "source": "/messages", "destination": "/api/messages" },
+    { "source": "/credits", "destination": "/api/credits" }
+  ]
+}
