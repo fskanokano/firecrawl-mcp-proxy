@@ -13,31 +13,43 @@
 
 ## 一键部署
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/fskanokano/firecrawl-mcp-proxy&project-name=firecrawl-mcp-proxy&repository-name=firecrawl-mcp-proxy&env=PROXY_API_KEY,FIRECRAWL_API_KEY)
 
-上面的按钮指向 `https://vercel.com/new`，任何账号点开都能用：选择你刚推上去的仓库即可（不带任何占位用户名，因此不会 404）。
-如果你想用「预填环境变量」的 clone 链接，请把下面这行里的 `OWNER` / `REPO` 换成你自己的 GitHub 用户名和仓库名后再使用——本仓库不知道你的用户名，所以这里只能给出模板，点开前必须先替换：
+按钮指向的就是下面这条链接，已预填仓库、项目名与两个环境变量的**名字**，点开即用（打开页面不需要登录，但真正创建项目需要 Vercel 账号，并授权它读取该私有仓库）：
 
 ```text
-https://vercel.com/new/clone?repository-url=https://github.com/OWNER/REPO&project-name=firecrawl-mcp-proxy&env=PROXY_API_KEY,FIRECRAWL_API_KEY
+https://vercel.com/new/clone?repository-url=https://github.com/fskanokano/firecrawl-mcp-proxy&project-name=firecrawl-mcp-proxy&repository-name=firecrawl-mcp-proxy&env=PROXY_API_KEY,FIRECRAWL_API_KEY
+```
+
+两点开箱前就该知道（都不是占位符，不需要你替换任何东西）：
+
+- **本仓库目前是 private**（`https://github.com/fskanokano/firecrawl-mcp-proxy`）。第一次用上面的链接时，Vercel 会要求你**授权它访问 GitHub**（安装 GitHub App / 授予该仓库权限）——private 仓库必须走这一步才能被导入；未登录或未授权的情况下，GitHub 对 private 仓库一律返回 404 而不是 403，这是 GitHub 的行为，不是链接写错了。若你想在**自己的** GitHub 账号下部署，先按下文 clone 再推到你自己的仓库，把链接里的 `repository-url` 换成你的地址。
+- **两个 Key 的值不在 URL 里，而是在导入时填入。** 为了避免把秘密写进 URL、浏览器历史和 Vercel 日志，上面只预填了变量名 `PROXY_API_KEY`、`FIRECRAWL_API_KEY`；值请在导入表单的 **Environment Variables** 里粘贴，再点 Deploy。
+
+把仓库拿到本地（private 仓库需要 GitHub 登录凭据，或先用 `gh auth login` 授权）：
+
+```bash
+git clone https://github.com/fskanokano/firecrawl-mcp-proxy.git
+cd firecrawl-mcp-proxy
 ```
 
 手动导入同样简单：
 
-1. 把本仓库推到 GitHub（public / private 都可以）。
-2. Vercel → **Add New… → Project → Import Git Repository**，选中本仓库。
-3. Framework Preset 保持 **Other**，Build Command / Output Directory / Install Command **全部留空**（本仓库不需要构建）。
-4. 在 **Environment Variables** 里填两个变量，然后 Deploy。
-5. 部署完成后访问 `https://<你的项目>.vercel.app/mcp`（不带任何 Key）：返回 `401 {"success":false,"error":"missing_api_key",…}` 就说明代理已经跑起来了；若返回 `500 proxy_misconfigured`，则是环境变量没配或名字拼错。
+1. Vercel → **Add New… → Project → Import Git Repository**，选中 `fskanokano/firecrawl-mcp-proxy`（private 仓库首次需要授权 GitHub 访问；想换成你自己的账号，先 clone 再推过去即可）。
+2. Framework Preset 保持 **Other**，Build Command / Output Directory / Install Command **全部留空**（本仓库不需要构建）。
+3. 在 **Environment Variables** 里填两个变量（值从下面的表格里取），然后 Deploy。
+4. 部署完成后访问 `https://<你的项目>.vercel.app/mcp`（不带任何 Key）：返回 `401 {"success":false,"error":"missing_api_key",…}` 就说明代理已经跑起来了；若返回 `500 proxy_misconfigured`，则是环境变量没配或名字拼错。
+
+> 下文所有 `https://<你的项目>.vercel.app/…` 里的 `<你的项目>` 是你**自己的** Vercel 项目名，部署之后才存在，因此无法预先写成可点的链接；本文档里其余写出的 URL 都是可直接打开的真实地址（需要登录的会注明）。
 
 ### 两个环境变量
 
 | 变量 | 必填 | 说明 |
 | --- | --- | --- |
 | `PROXY_API_KEY` | ✅ | 代理自己的密钥，客户端用它连接本代理。建议 `openssl rand -hex 32` 生成 |
-| `FIRECRAWL_API_KEY` | ✅ | Firecrawl 的 API Key（`fc-…`），由代理注入上游，永不下发给客户端。在 https://www.firecrawl.dev/app/api-keys 获取 |
+| `FIRECRAWL_API_KEY` | ✅ | Firecrawl 的 API Key（`fc-…`），由代理注入上游，永不下发给客户端。在 https://www.firecrawl.dev/app/api-keys 获取（该地址会跳到 Firecrawl 的登录页 `/signin`，**需要登录 Firecrawl 账号**才能创建 Key） |
 
-就这两个。上游地址固定指向官方（`https://mcp.firecrawl.dev` 与 `https://api.firecrawl.dev`），没有别的开关。
+就这两个。上游地址固定指向官方（`https://mcp.firecrawl.dev` 与 `https://api.firecrawl.dev`），没有别的开关。这两个是**服务端接口**而不是给人用的页面：直接 GET `https://api.firecrawl.dev` 会返回 `{"message":"Firecrawl API",…}`，在浏览器里打开 `https://mcp.firecrawl.dev` 会跳到官方 MCP 文档页——都属正常，不代表代理出问题。
 
 ---
 
